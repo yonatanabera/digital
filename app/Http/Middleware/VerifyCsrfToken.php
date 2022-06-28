@@ -13,5 +13,7 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         //
+        'https://api.medanit.com/api/*',
+        'https://api.medanit.com/*'
     ];
 }

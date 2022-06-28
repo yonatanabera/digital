@@ -17,10 +17,15 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
+
+    const IS_ADMIN = 0;
+    const IS_AGENT = 1;
+    
     protected $fillable = [
         'name',
         'email',
         'password',
+        'role'
     ];
 
     /**
@@ -41,4 +46,9 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function registeredMedications()
+    {
+        return $this->hasMany(Medication::class, 'agent_id');
+    }
 }
