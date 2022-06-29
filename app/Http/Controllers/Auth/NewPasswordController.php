@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 
 class NewPasswordController extends Controller
@@ -16,16 +17,16 @@ class NewPasswordController extends Controller
      * Handle an incoming new password request.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\JsonResponse
      *
      * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request)
     {
         $request->validate([
-            'token' => 'required',
-            'email' => 'required|email',
-            'password' => 'required|string|confirmed|min:8',
+            'token' => ['required'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         // Here we will attempt to reset the user's password. If it is successful we
@@ -43,20 +44,12 @@ class NewPasswordController extends Controller
             }
         );
 
-        if ($request->wantsJson()) {
-            return $status == Password::PASSWORD_RESET
-                ? response()->json(['status' => __($status)])
-                : throw ValidationException::withMessages([
-                    'email' => [__($status)],
-                ]);
+        if ($status != Password::PASSWORD_RESET) {
+            throw ValidationException::withMessages([
+                'email' => [__($status)],
+            ]);
         }
 
-        // If the password was successfully reset, we will redirect the user back to
-        // the application's home authenticated view. If there is an error we can
-        // redirect them back to where they came from with their error message.
-        return $status == Password::PASSWORD_RESET
-                    ? redirect()->route('login')->with('status', __($status))
-                    : back()->withInput($request->only('email'))
-                            ->withErrors(['email' => __($status)]);
+        return response()->json(['status' => __($status)]);
     }
 }

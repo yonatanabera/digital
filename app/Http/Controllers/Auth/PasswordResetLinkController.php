@@ -13,14 +13,14 @@ class PasswordResetLinkController extends Controller
      * Handle an incoming password reset link request.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\JsonResponse
      *
      * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'email' => ['required', 'email'],
         ]);
 
         // We will send the password reset link to this user. Once we have attempted
@@ -30,17 +30,12 @@ class PasswordResetLinkController extends Controller
             $request->only('email')
         );
 
-        if ($request->wantsJson()) {
-            return $status == Password::RESET_LINK_SENT
-                ? response()->json(['status' => __($status)])
-                : throw ValidationException::withMessages([
-                    'email' => [__($status)],
-                ]);
+        if ($status != Password::RESET_LINK_SENT) {
+            throw ValidationException::withMessages([
+                'email' => [__($status)],
+            ]);
         }
 
-        return $status == Password::RESET_LINK_SENT
-                    ? back()->with('status', __($status))
-                    : back()->withInput($request->only('email'))
-                            ->withErrors(['email' => __($status)]);
+        return response()->json(['status' => __($status)]);
     }
 }

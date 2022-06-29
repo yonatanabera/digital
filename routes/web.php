@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,11 +14,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return ['Laravel' => app()->version()];
 });
 
-Route::get('no-controller', function () {
-    return ('There is no Controller');
-});
-
-Route::get('home', [HomeController::class, 'index']);
+require __DIR__.'/auth.php';
